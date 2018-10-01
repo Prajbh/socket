@@ -1,5 +1,6 @@
-# import socket programming library 
-import socket 
+# Socket programming - server side
+import socket
+import sys 
   
 # import thread module 
 from _thread import *
@@ -8,58 +9,57 @@ import threading
 print_lock = threading.Lock()
 
 clientList = {}
-  
-# thread fuction 
-def threaded(c): 
+
+#define a thread
+def threaded(a): 
     while True: 
   
-        # data received from client 
-        data = c.recv(1024) 
+        # server receives the data from client 
+        data = a.recv(1024) 
         if not data: 
-            print('Bye') 
+            print("Client " + str(clientList[a]) + " left" )
             break
   
         # reverse the given string from client 
-        print("Message recieved from client" + str(clientList[c]) + "-" + data.decode("utf-8"))
+        print("\nMessage recieved from client " + str(clientList[a]) + " - " + data.decode("utf-8"))
         data = data[::-1]
  
-        # send back reversed string to client 
-        c.send(data) 
+        # send the manipulated data to the client
+        a.send(data) 
   
     # connection closed 
-    c.close() 
+    a.close() 
   
   
 def Main(): 
     host = "" 
     count = 1
+
+   #Enter the port number to bind
+    port = 22796
+    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM) 
+
+    sock.bind((host, port)) 
+    print("socket has binded to the port", port) 
   
-    # reverse a port on your computer 
-    # in our case it is 12345 but it 
-    # can be anything 
-    port = 12345
-    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM) 
-    s.bind((host, port)) 
-    print("socket binded to post", port) 
-  
-    # put the socket into listening mode 
-    s.listen(5) 
+    # socket listen upto 5 requests 
+    sock.listen(5) 
     print("socket is listening") 
-  
-    # a forever loop until client wants to exit 
+
+
     while True: 
   
-        # establish connection with client 
-        c, addr = s.accept() 
+        # establishing connection with client 
+        a, addr = sock.accept() 
 
-        clientList[c] = count
+        clientList[a] = count
         count = count + 1
 
-        print('Connected to :', addr[0], ':', addr[1]) 
+        print('\nConnected to :', addr[0], ':', addr[1]) 
   
-        # Start a new thread and return its identifier 
-        start_new_thread(threaded, (c,)) 
-    s.close() 
+        # To start a new thread 
+        start_new_thread(threaded, (a,)) 
+    sock.close() 
   
   
 if __name__ == '__main__': 
